@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
 import '../data/levels.dart';
 import '../models/player_form_values.dart';
@@ -24,11 +24,11 @@ class PlayerForm extends StatefulWidget {
 
   final String title;
   final String primaryButtonLabel;
-  final void Function(PlayerFormValues values) onSubmit;
+  final Future<void> Function(PlayerFormValues values) onSubmit;
   final VoidCallback onCancel;
   final PlayerFormValues? initialValues;
   final String? secondaryButtonLabel;
-  final VoidCallback? onSecondaryPressed;
+  final Future<void> Function()? onSecondaryPressed;
 
   @override
   State<PlayerForm> createState() => _PlayerFormState();
@@ -44,6 +44,7 @@ class _PlayerFormState extends State<PlayerForm> {
   late final TextEditingController _addressController;
   late final TextEditingController _remarksController;
   late PlayerLevelRange _selectedRange;
+  bool _isSubmitting = false;
 
   @override
   void initState() {
@@ -118,7 +119,7 @@ class _PlayerFormState extends State<PlayerForm> {
                           ),
                         ),
                         TextButton(
-                          onPressed: _handleSubmit,
+                          onPressed: _isSubmitting ? null : _handleSubmit,
                           child: Text(
                             widget.primaryButtonLabel,
                             style: const TextStyle(
@@ -359,7 +360,7 @@ class _PlayerFormState extends State<PlayerForm> {
   Widget _buildFooterActions() {
     final actions = <Widget>[
       TextButton(
-        onPressed: widget.onCancel,
+        onPressed: _isSubmitting ? null : widget.onCancel,
         style: TextButton.styleFrom(
           foregroundColor: const Color(0xFF6C7A92),
           textStyle: const TextStyle(fontWeight: FontWeight.w600),
@@ -371,7 +372,7 @@ class _PlayerFormState extends State<PlayerForm> {
     if (widget.secondaryButtonLabel != null && widget.onSecondaryPressed != null) {
       actions.add(
         TextButton(
-          onPressed: widget.onSecondaryPressed,
+          onPressed: _isSubmitting ? null : () => _handleSecondaryAction(widget.onSecondaryPressed!),
           style: TextButton.styleFrom(
             foregroundColor: const Color(0xFFFF6B6B),
             textStyle: const TextStyle(fontWeight: FontWeight.w600),
@@ -390,6 +391,24 @@ class _PlayerFormState extends State<PlayerForm> {
               ))
           .toList(),
     );
+  }
+
+  Future<void> _handleSecondaryAction(Future<void> Function() action) async {
+    if (_isSubmitting) {
+      return;
+    }
+    setState(() {
+      _isSubmitting = true;
+    });
+    try {
+      await action();
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+        });
+      }
+    }
   }
 
   String? _nonEmptyValidator(String? value) {
@@ -439,3 +458,10 @@ class _PlayerFormState extends State<PlayerForm> {
     widget.onSubmit(values);
   }
 }
+
+
+
+
+
+
+

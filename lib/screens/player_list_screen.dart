@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:badminton_profiles/widgets/widgets.dart';
+import 'package:badminton_profiles/widgets/player_list_tile.dart';
 import '../models/player_profile.dart';
 
 class PlayerListScreen extends StatefulWidget {
@@ -10,12 +10,14 @@ class PlayerListScreen extends StatefulWidget {
     required this.onAddPlayer,
     required this.onEditPlayer,
     required this.onDeletePlayer,
+    this.isLoading = false,
   });
 
   final List<PlayerProfile> players;
   final VoidCallback onAddPlayer;
   final void Function(PlayerProfile player) onEditPlayer;
-  final void Function(String playerId) onDeletePlayer;
+  final Future<void> Function(String playerId) onDeletePlayer;
+  final bool isLoading;
 
   @override
   State<PlayerListScreen> createState() => _PlayerListScreenState();
@@ -26,6 +28,12 @@ class _PlayerListScreenState extends State<PlayerListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    }
+
     final filteredPlayers = _filterPlayers();
 
     return Center(
@@ -206,12 +214,11 @@ class _PlayerListScreenState extends State<PlayerListScreen> {
           ],
         );
       },
-    ).then((shouldDelete) {
+    ).then((shouldDelete) async {
       if (shouldDelete == true) {
-        widget.onDeletePlayer(player.id);
+        await widget.onDeletePlayer(player.id);
       }
       return shouldDelete;
     });
   }
 }
-

@@ -1,29 +1,44 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
 import 'data/players.dart';
 import 'models/player_form_values.dart';
 import 'models/player_profile.dart';
+import 'repository/player_repository.dart';
 import 'screens/add_player_screen.dart';
 import 'screens/edit_player_screen.dart';
 import 'screens/player_list_screen.dart';
 
 class PlayerAppManager extends StatefulWidget {
-  const PlayerAppManager({super.key});
+  const PlayerAppManager({super.key, required this.repository});
+
+  final PlayerRepository repository;
 
   @override
   State<PlayerAppManager> createState() => _PlayerAppManagerState();
 }
 
 class _PlayerAppManagerState extends State<PlayerAppManager> {
-  late List<PlayerProfile> _players;
+  List<PlayerProfile> _players = const [];
   late Widget _activeScreen;
-  int _idCounter = seedPlayers.length;
+  bool _isLoading = true;
+  int _idCounter = 0;
 
   @override
   void initState() {
     super.initState();
-    _players = List<PlayerProfile>.of(seedPlayers);
     _activeScreen = _buildListScreen();
+    _initialize();
+  }
+
+  Future<void> _initialize() async {
+    await widget.repository.init();
+    final loadedPlayers = await widget.repository.loadPlayers();
+    setState(() {
+      _players = loadedPlayers;
+      _isLoading = false;
+      _idCounter = _deriveCounter(loadedPlayers);
+      _activeScreen = _buildListScreen();
+    });
   }
 
   @override
@@ -74,7 +89,7 @@ class _PlayerAppManagerState extends State<PlayerAppManager> {
     });
   }
 
-  void _handleCreatePlayer(PlayerFormValues values) {
+  Future<void> _handleCreatePlayer(PlayerFormValues values) async {
     final newPlayer = PlayerProfile(
       id: _generateId(),
       nickname: values.nickname,
@@ -86,13 +101,15 @@ class _PlayerAppManagerState extends State<PlayerAppManager> {
       levelRange: values.levelRange,
     );
 
+    await widget.repository.savePlayer(newPlayer);
+
     setState(() {
-      _players.add(newPlayer);
+      _players = [..._players, newPlayer];
       _activeScreen = _buildListScreen();
     });
   }
 
-  void _handleUpdatePlayer(String id, PlayerFormValues values) {
+  Future<void> _handleUpdatePlayer(String id, PlayerFormValues values) async {
     final index = _players.indexWhere((player) => player.id == id);
     if (index == -1) {
       return;
@@ -108,15 +125,21 @@ class _PlayerAppManagerState extends State<PlayerAppManager> {
       levelRange: values.levelRange,
     );
 
+    await widget.repository.savePlayer(updated);
+
     setState(() {
-      _players[index] = updated;
+      final nextPlayers = [..._players];
+      nextPlayers[index] = updated;
+      _players = nextPlayers;
       _activeScreen = _buildListScreen();
     });
   }
 
-  void _handleDeletePlayer(String id) {
+  Future<void> _handleDeletePlayer(String id) async {
+    await widget.repository.deletePlayer(id);
+
     setState(() {
-      _players.removeWhere((player) => player.id == id);
+      _players = _players.where((player) => player.id != id).toList();
       _activeScreen = _buildListScreen();
     });
   }
@@ -127,6 +150,7 @@ class _PlayerAppManagerState extends State<PlayerAppManager> {
       onAddPlayer: _showAddScreen,
       onEditPlayer: _showEditScreen,
       onDeletePlayer: _handleDeletePlayer,
+      isLoading: _isLoading,
     );
   }
 
@@ -134,4 +158,22 @@ class _PlayerAppManagerState extends State<PlayerAppManager> {
     _idCounter += 1;
     return 'player-$_idCounter';
   }
+
+  int _deriveCounter(List<PlayerProfile> players) {
+    if (players.isEmpty) {
+      return seedPlayers.length;
+    }
+    int maxValue = seedPlayers.length;
+    for (final player in players) {
+      final parts = player.id.split('-');
+      if (parts.isNotEmpty) {
+        final value = int.tryParse(parts.last) ?? 0;
+        if (value > maxValue) {
+          maxValue = value;
+        }
+      }
+    }
+    return maxValue;
+  }
 }
+

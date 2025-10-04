@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
 import '../models/player_form_values.dart';
 import '../models/player_profile.dart';
@@ -14,8 +14,8 @@ class EditPlayerScreen extends StatelessWidget {
   });
 
   final PlayerProfile player;
-  final void Function(PlayerFormValues values) onSubmit;
-  final VoidCallback onDelete;
+  final Future<void> Function(PlayerFormValues values) onSubmit;
+  final Future<void> Function() onDelete;
   final VoidCallback onCancel;
 
   @override
@@ -49,17 +49,17 @@ class EditPlayerScreen extends StatelessWidget {
   Future<void> _confirmDelete(BuildContext context) async {
     final shouldDelete = await showDialog<bool>(
       context: context,
-      builder: (context) {
+      builder: (alertContext) {
         return AlertDialog(
           title: const Text('Delete Player'),
           content: Text('Delete ${player.nickname}? This cannot be undone.'),
           actions: [
             TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
+              onPressed: () => Navigator.of(alertContext).pop(false),
               child: const Text('Cancel'),
             ),
             TextButton(
-              onPressed: () => Navigator.of(context).pop(true),
+              onPressed: () => Navigator.of(alertContext).pop(true),
               child: const Text('Delete'),
             ),
           ],
@@ -68,7 +68,7 @@ class EditPlayerScreen extends StatelessWidget {
     );
 
     if (shouldDelete == true) {
-      onDelete();
+      await onDelete();
     }
   }
 }

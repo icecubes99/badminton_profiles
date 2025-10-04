@@ -1,5 +1,13 @@
-﻿class PlayerLevelRange {
+import 'package:hive/hive.dart';
+
+part 'player_level_range.g.dart';
+
+@HiveType(typeId: 1)
+class PlayerLevelRange {
+  @HiveField(0)
   final int startIndex;
+
+  @HiveField(1)
   final int endIndex;
 
   const PlayerLevelRange({
