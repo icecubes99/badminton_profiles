@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 import '../models/player_form_values.dart';
 import '../models/player_profile.dart';
@@ -32,7 +32,7 @@ class EditPlayerScreen extends StatelessWidget {
 
     return Center(
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 600),
+        constraints: const BoxConstraints(maxWidth: 640),
         child: PlayerForm(
           title: 'Edit Player Profile',
           primaryButtonLabel: 'Update Player',

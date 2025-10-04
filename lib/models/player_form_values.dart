@@ -1,4 +1,4 @@
-import 'player_level_range.dart';
+﻿import 'player_level_range.dart';
 
 class PlayerFormValues {
   final String nickname;

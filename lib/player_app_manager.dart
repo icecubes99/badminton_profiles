@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 import 'data/players.dart';
 import 'models/player_form_values.dart';
@@ -15,33 +15,34 @@ class PlayerAppManager extends StatefulWidget {
 }
 
 class _PlayerAppManagerState extends State<PlayerAppManager> {
-  Widget? activeScreen;
   late List<PlayerProfile> _players;
+  late Widget _activeScreen;
   int _idCounter = seedPlayers.length;
 
   @override
   void initState() {
     super.initState();
     _players = List<PlayerProfile>.of(seedPlayers);
-    activeScreen = _buildListScreen();
+    _activeScreen = _buildListScreen();
   }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        scaffoldBackgroundColor: Colors.transparent,
+      ),
       home: Scaffold(
         body: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
-              colors: [Colors.blue, Colors.pinkAccent],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
+              colors: [Color(0xFFF3F6FB), Color(0xFFE7ECF3)],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
             ),
           ),
-          child: SafeArea(
-            child: activeScreen ?? const SizedBox.shrink(),
-          ),
+          child: SafeArea(child: _activeScreen),
         ),
       ),
     );
@@ -49,25 +50,25 @@ class _PlayerAppManagerState extends State<PlayerAppManager> {
 
   void _showListScreen() {
     setState(() {
-      activeScreen = _buildListScreen();
+      _activeScreen = _buildListScreen();
     });
   }
 
   void _showAddScreen() {
     setState(() {
-      activeScreen = AddPlayerScreen(
+      _activeScreen = AddPlayerScreen(
         onSubmit: _handleCreatePlayer,
         onCancel: _showListScreen,
       );
     });
   }
 
-  void _showEditScreen(PlayerProfile profile) {
+  void _showEditScreen(PlayerProfile player) {
     setState(() {
-      activeScreen = EditPlayerScreen(
-        player: profile,
-        onSubmit: (values) => _handleUpdatePlayer(profile.id, values),
-        onDelete: () => _handleDeletePlayer(profile.id),
+      _activeScreen = EditPlayerScreen(
+        player: player,
+        onSubmit: (values) => _handleUpdatePlayer(player.id, values),
+        onDelete: () => _handleDeletePlayer(player.id),
         onCancel: _showListScreen,
       );
     });
@@ -87,17 +88,17 @@ class _PlayerAppManagerState extends State<PlayerAppManager> {
 
     setState(() {
       _players.add(newPlayer);
-      activeScreen = _buildListScreen();
+      _activeScreen = _buildListScreen();
     });
   }
 
   void _handleUpdatePlayer(String id, PlayerFormValues values) {
-    final playerIndex = _players.indexWhere((player) => player.id == id);
-    if (playerIndex == -1) {
+    final index = _players.indexWhere((player) => player.id == id);
+    if (index == -1) {
       return;
     }
 
-    final updatedPlayer = _players[playerIndex].copyWith(
+    final updated = _players[index].copyWith(
       nickname: values.nickname,
       fullName: values.fullName,
       contactNumber: values.contactNumber,
@@ -108,19 +109,19 @@ class _PlayerAppManagerState extends State<PlayerAppManager> {
     );
 
     setState(() {
-      _players[playerIndex] = updatedPlayer;
-      activeScreen = _buildListScreen();
+      _players[index] = updated;
+      _activeScreen = _buildListScreen();
     });
   }
 
   void _handleDeletePlayer(String id) {
     setState(() {
       _players.removeWhere((player) => player.id == id);
-      activeScreen = _buildListScreen();
+      _activeScreen = _buildListScreen();
     });
   }
 
-  PlayerListScreen _buildListScreen() {
+  Widget _buildListScreen() {
     return PlayerListScreen(
       players: _players,
       onAddPlayer: _showAddScreen,

@@ -1,4 +1,4 @@
-import '../models/player_level_range.dart';
+﻿import '../models/player_level_range.dart';
 import '../models/player_profile.dart';
 
 final List<PlayerProfile> seedPlayers = [

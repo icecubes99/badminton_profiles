@@ -1,4 +1,4 @@
-class PlayerLevelRange {
+﻿class PlayerLevelRange {
   final int startIndex;
   final int endIndex;
 
@@ -14,7 +14,7 @@ class PlayerLevelRange {
     );
   }
 
-  bool containsIndex(int index) {
+  bool contains(int index) {
     return index >= startIndex && index <= endIndex;
   }
 }

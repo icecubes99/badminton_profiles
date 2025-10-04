@@ -1,8 +1,14 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 import '../data/levels.dart';
 import '../models/player_form_values.dart';
 import '../models/player_level_range.dart';
+
+const TextStyle _scaleTopLabelStyle = TextStyle(
+  color: Color(0xFF9AA5BD),
+  fontSize: 10,
+  fontWeight: FontWeight.w600,
+);
 
 class PlayerForm extends StatefulWidget {
   const PlayerForm({
@@ -76,68 +82,109 @@ class _PlayerFormState extends State<PlayerForm> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
       child: Form(
         key: _formKey,
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              widget.title,
-              style: const TextStyle(
+            Container(
+              decoration: BoxDecoration(
                 color: Colors.white,
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: const Color(0xFFDCE4F4)),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x0C1C2B5A),
+                    blurRadius: 24,
+                    offset: Offset(0, 10),
+                  ),
+                ],
               ),
-              textAlign: TextAlign.center,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            widget.title,
+                            style: const TextStyle(
+                              color: Color(0xFF1C2B5A),
+                              fontSize: 28,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: _handleSubmit,
+                          child: Text(
+                            widget.primaryButtonLabel,
+                            style: const TextStyle(
+                              color: Color(0xFF3D73FF),
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    _buildTextField(
+                      controller: _nicknameController,
+                      label: 'Nickname',
+                      icon: Icons.person_outline,
+                      validator: _nonEmptyValidator,
+                    ),
+                    const SizedBox(height: 20),
+                    _buildTextField(
+                      controller: _fullNameController,
+                      label: 'Full Name',
+                      icon: Icons.badge_outlined,
+                      validator: _nonEmptyValidator,
+                    ),
+                    const SizedBox(height: 20),
+                    _buildTextField(
+                      controller: _contactController,
+                      label: 'Mobile Number',
+                      icon: Icons.phone_outlined,
+                      keyboardType: TextInputType.phone,
+                      validator: _phoneValidator,
+                    ),
+                    const SizedBox(height: 20),
+                    _buildTextField(
+                      controller: _emailController,
+                      label: 'Email Address',
+                      icon: Icons.mail_outline,
+                      keyboardType: TextInputType.emailAddress,
+                      validator: _emailValidator,
+                    ),
+                    const SizedBox(height: 20),
+                    _buildTextField(
+                      controller: _addressController,
+                      label: 'Home Address',
+                      icon: Icons.location_on_outlined,
+                      validator: _nonEmptyValidator,
+                      minLines: 2,
+                      maxLines: 3,
+                    ),
+                    const SizedBox(height: 20),
+                    _buildTextField(
+                      controller: _remarksController,
+                      label: 'Remarks',
+                      icon: Icons.menu_book_outlined,
+                      minLines: 2,
+                      maxLines: 3,
+                    ),
+                    const SizedBox(height: 28),
+                    _buildLevelSelector(),
+                  ],
+                ),
+              ),
             ),
             const SizedBox(height: 24),
-            _buildTextField(
-              controller: _nicknameController,
-              label: 'Nickname',
-              validator: _nonEmptyValidator,
-            ),
-            const SizedBox(height: 12),
-            _buildTextField(
-              controller: _fullNameController,
-              label: 'Full Name',
-              validator: _nonEmptyValidator,
-            ),
-            const SizedBox(height: 12),
-            _buildTextField(
-              controller: _contactController,
-              label: 'Contact Number',
-              keyboardType: TextInputType.phone,
-              validator: _phoneValidator,
-            ),
-            const SizedBox(height: 12),
-            _buildTextField(
-              controller: _emailController,
-              label: 'Email',
-              keyboardType: TextInputType.emailAddress,
-              validator: _emailValidator,
-            ),
-            const SizedBox(height: 12),
-            _buildTextField(
-              controller: _addressController,
-              label: 'Address',
-              validator: _nonEmptyValidator,
-              minLines: 2,
-              maxLines: 3,
-            ),
-            const SizedBox(height: 12),
-            _buildTextField(
-              controller: _remarksController,
-              label: 'Remarks',
-              minLines: 2,
-              maxLines: 3,
-            ),
-            const SizedBox(height: 24),
-            _buildLevelSelector(),
-            const SizedBox(height: 24),
-            _buildActions(),
+            _buildFooterActions(),
           ],
         ),
       ),
@@ -147,30 +194,60 @@ class _PlayerFormState extends State<PlayerForm> {
   Widget _buildTextField({
     required TextEditingController controller,
     required String label,
+    required IconData icon,
     TextInputType? keyboardType,
     String? Function(String?)? validator,
     int minLines = 1,
     int maxLines = 1,
   }) {
-    return TextFormField(
-      controller: controller,
-      keyboardType: keyboardType,
-      validator: validator,
-      minLines: minLines,
-      maxLines: maxLines,
-      style: const TextStyle(color: Colors.black87),
-      decoration: InputDecoration(
-        filled: true,
-        fillColor: Colors.white,
-        labelText: label,
-        border: const OutlineInputBorder(),
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label.toUpperCase(),
+          style: const TextStyle(
+            color: Color(0xFF7A88A8),
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 1.0,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          keyboardType: keyboardType,
+          validator: validator,
+          minLines: minLines,
+          maxLines: maxLines,
+          style: const TextStyle(color: Color(0xFF1C2B5A)),
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: const Color(0xFFF8FAFF),
+            prefixIcon: Icon(icon, color: const Color(0xFF3D73FF)),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: const BorderSide(color: Color(0xFFE1E8F5)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: const BorderSide(color: Color(0xFF3D73FF), width: 1.6),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: const BorderSide(color: Colors.redAccent),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: const BorderSide(color: Colors.redAccent),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
   Widget _buildLevelSelector() {
-    final description = describeLevelRange(_selectedRange);
-    final RangeValues values = RangeValues(
+    final values = RangeValues(
       _selectedRange.startIndex.toDouble(),
       _selectedRange.endIndex.toDouble(),
     );
@@ -179,59 +256,61 @@ class _PlayerFormState extends State<PlayerForm> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Badminton Level Range',
+          'LEVEL',
           style: TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
+            color: Color(0xFF7A88A8),
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 1.0,
           ),
         ),
         const SizedBox(height: 8),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
           decoration: BoxDecoration(
-            color: const Color.fromRGBO(255, 255, 255, 0.9),
-            borderRadius: BorderRadius.circular(8),
+            color: const Color(0xFFF8FAFF),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFFE1E8F5)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                description,
+                describeLevelRange(_selectedRange),
                 style: const TextStyle(
-                  color: Colors.black87,
+                  color: Color(0xFF1C2B5A),
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              RangeSlider(
-                min: 0,
-                max: (levelSteps.length - 1).toDouble(),
-                values: values,
-                divisions: levelSteps.length - 1,
-                labels: RangeLabels(
-                  getLevelStep(_selectedRange.startIndex).displayLabel,
-                  getLevelStep(_selectedRange.endIndex).displayLabel,
+              const SizedBox(height: 12),
+              SliderTheme(
+                data: SliderTheme.of(context).copyWith(
+                  thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 10),
+                  activeTrackColor: const Color(0xFF3D73FF),
+                  inactiveTrackColor: const Color(0xFFD7E2F7),
+                  trackHeight: 4,
                 ),
-                onChanged: (range) {
-                  setState(() {
-                    _selectedRange = PlayerLevelRange(
-                      startIndex: range.start.round(),
-                      endIndex: range.end.round(),
-                    );
-                  });
-                },
+                child: RangeSlider(
+                  min: 0,
+                  max: (levelSteps.length - 1).toDouble(),
+                  values: values,
+                  divisions: levelSteps.length - 1,
+                  labels: RangeLabels(
+                    getLevelStep(_selectedRange.startIndex).displayLabel,
+                    getLevelStep(_selectedRange.endIndex).displayLabel,
+                  ),
+                  onChanged: (range) {
+                    setState(() {
+                      _selectedRange = PlayerLevelRange(
+                        startIndex: range.start.round(),
+                        endIndex: range.end.round(),
+                      );
+                    });
+                  },
+                ),
               ),
-              Wrap(
-                spacing: 8,
-                runSpacing: 4,
-                children: levelSteps.map((step) {
-                  return Chip(
-                    label: Text(step.displayLabel),
-                    backgroundColor: Colors.blueGrey.shade50,
-                    visualDensity: VisualDensity.compact,
-                  );
-                }).toList(),
-              ),
+              const SizedBox(height: 12),
+              _buildLevelScale(),
             ],
           ),
         ),
@@ -239,43 +318,77 @@ class _PlayerFormState extends State<PlayerForm> {
     );
   }
 
-  Widget _buildActions() {
+  Widget _buildLevelScale() {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        ElevatedButton(
-          onPressed: _handleSubmit,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.amberAccent,
-            foregroundColor: Colors.black,
-            padding: const EdgeInsets.symmetric(vertical: 14),
-          ),
-          child: Text(widget.primaryButtonLabel),
+        Row(
+          children: levelNames.map((_) {
+            return Expanded(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: const [
+                  Text('W', style: _scaleTopLabelStyle),
+                  Text('M', style: _scaleTopLabelStyle),
+                  Text('S', style: _scaleTopLabelStyle),
+                ],
+              ),
+            );
+          }).toList(),
         ),
-        const SizedBox(height: 12),
-        OutlinedButton(
-          onPressed: widget.onCancel,
-          style: OutlinedButton.styleFrom(
-            foregroundColor: Colors.white,
-            side: const BorderSide(color: Colors.white),
-            padding: const EdgeInsets.symmetric(vertical: 14),
-          ),
-          child: const Text('Cancel'),
+        const SizedBox(height: 6),
+        Row(
+          children: levelNames.map((level) {
+            return Expanded(
+              child: Text(
+                level.toUpperCase(),
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Color(0xFF5C6C8F),
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.8,
+                ),
+              ),
+            );
+          }).toList(),
         ),
-        if (widget.secondaryButtonLabel != null &&
-            widget.onSecondaryPressed != null) ...[
-          const SizedBox(height: 12),
-          OutlinedButton(
-            onPressed: widget.onSecondaryPressed,
-            style: OutlinedButton.styleFrom(
-              foregroundColor: Colors.redAccent,
-              side: const BorderSide(color: Colors.redAccent),
-              padding: const EdgeInsets.symmetric(vertical: 14),
-            ),
-            child: Text(widget.secondaryButtonLabel!),
-          ),
-        ],
       ],
+    );
+  }
+
+  Widget _buildFooterActions() {
+    final actions = <Widget>[
+      TextButton(
+        onPressed: widget.onCancel,
+        style: TextButton.styleFrom(
+          foregroundColor: const Color(0xFF6C7A92),
+          textStyle: const TextStyle(fontWeight: FontWeight.w600),
+        ),
+        child: const Text('Cancel'),
+      ),
+    ];
+
+    if (widget.secondaryButtonLabel != null && widget.onSecondaryPressed != null) {
+      actions.add(
+        TextButton(
+          onPressed: widget.onSecondaryPressed,
+          style: TextButton.styleFrom(
+            foregroundColor: const Color(0xFFFF6B6B),
+            textStyle: const TextStyle(fontWeight: FontWeight.w600),
+          ),
+          child: Text(widget.secondaryButtonLabel!),
+        ),
+      );
+    }
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: actions
+          .map((button) => Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: button,
+              ))
+          .toList(),
     );
   }
 
@@ -290,9 +403,8 @@ class _PlayerFormState extends State<PlayerForm> {
     if (value == null || value.trim().isEmpty) {
       return 'Contact number is required';
     }
-    final trimmed = value.trim();
     final digitsOnly = RegExp(r'^\d+$');
-    if (!digitsOnly.hasMatch(trimmed)) {
+    if (!digitsOnly.hasMatch(value.trim())) {
       return 'Use digits only';
     }
     return null;
@@ -302,9 +414,8 @@ class _PlayerFormState extends State<PlayerForm> {
     if (value == null || value.trim().isEmpty) {
       return 'Email is required';
     }
-    final trimmed = value.trim();
     final emailRegExp = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
-    if (!emailRegExp.hasMatch(trimmed)) {
+    if (!emailRegExp.hasMatch(value.trim())) {
       return 'Enter a valid email';
     }
     return null;

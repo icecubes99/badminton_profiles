@@ -1,4 +1,4 @@
-import '../models/player_level_range.dart';
+﻿import '../models/player_level_range.dart';
 
 class LevelStep {
   final int index;
@@ -11,9 +11,7 @@ class LevelStep {
     required this.strengthLabel,
   });
 
-  String get displayLabel {
-    return '$levelLabel ($strengthLabel)';
-  }
+  String get displayLabel => '$levelLabel ($strengthLabel)';
 }
 
 const List<String> levelNames = [
@@ -26,14 +24,10 @@ const List<String> levelNames = [
   'Open Player',
 ];
 
-const List<String> strengthLabels = [
-  'Weak',
-  'Mid',
-  'Strong',
-];
+const List<String> strengthLabels = ['Weak', 'Mid', 'Strong'];
 
 List<LevelStep> buildLevelSteps() {
-  final List<LevelStep> steps = [];
+  final steps = <LevelStep>[];
   var index = 0;
   for (final level in levelNames) {
     for (final strength in strengthLabels) {
@@ -53,26 +47,14 @@ List<LevelStep> buildLevelSteps() {
 final List<LevelStep> levelSteps = buildLevelSteps();
 
 LevelStep getLevelStep(int index) {
-  return levelSteps.firstWhere((step) => step.index == index);
+  return levelSteps[index.clamp(0, levelSteps.length - 1)];
 }
 
 String describeLevelRange(PlayerLevelRange range) {
-  final startStep = getLevelStep(range.startIndex);
-  final endStep = getLevelStep(range.endIndex);
-  if (startStep.index == endStep.index) {
-    return startStep.displayLabel;
+  final start = getLevelStep(range.startIndex);
+  final end = getLevelStep(range.endIndex);
+  if (start.index == end.index) {
+    return start.displayLabel;
   }
-  return '${startStep.displayLabel} - ${endStep.displayLabel}';
-}
-
-int clampLevelIndex(int value) {
-  final int min = 0;
-  final int max = levelSteps.length - 1;
-  if (value < min) {
-    return min;
-  }
-  if (value > max) {
-    return max;
-  }
-  return value;
+  return '${start.displayLabel} - ${end.displayLabel}';
 }

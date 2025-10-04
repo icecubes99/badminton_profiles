@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 import '../models/player_form_values.dart';
 import '../widgets/player_form.dart';
@@ -17,7 +17,7 @@ class AddPlayerScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 600),
+        constraints: const BoxConstraints(maxWidth: 640),
         child: PlayerForm(
           title: 'Add New Player',
           primaryButtonLabel: 'Save Player',
