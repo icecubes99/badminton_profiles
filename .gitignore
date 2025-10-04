@@ -11,6 +11,7 @@
 .svn/
 .swiftpm/
 migrate_working_dir/
+sample-from-quizapp/
 
 # IntelliJ related
 *.iml
