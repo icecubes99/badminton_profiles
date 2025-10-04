@@ -12,7 +12,7 @@
 .swiftpm/
 migrate_working_dir/
 sample-from-quizapp/
-
+quiz_app_concepts.md
 # IntelliJ related
 *.iml
 *.ipr
