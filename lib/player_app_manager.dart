@@ -3,16 +3,24 @@ import 'package:flutter/material.dart';
 import 'data/players.dart';
 import 'models/player_form_values.dart';
 import 'models/player_profile.dart';
+import 'models/user_settings.dart';
 import 'repository/player_repository.dart';
+import 'repository/settings_repository.dart';
 import 'screens/add_player_screen.dart';
 import 'screens/edit_player_screen.dart';
 import 'screens/player_list_screen.dart';
+import 'screens/user_settings_screen.dart';
 
 // Main app manager that handles navigation and player data management
 class PlayerAppManager extends StatefulWidget {
-  const PlayerAppManager({super.key, required this.repository});
+  const PlayerAppManager({
+    super.key, 
+    required this.repository,
+    required this.settingsRepository,
+  });
 
   final PlayerRepository repository; // Data access layer
+  final SettingsRepository settingsRepository; // Settings data access layer
 
   @override
   State<PlayerAppManager> createState() => _PlayerAppManagerState();
@@ -20,6 +28,7 @@ class PlayerAppManager extends StatefulWidget {
 
 class _PlayerAppManagerState extends State<PlayerAppManager> {
   List<PlayerProfile> _players = const []; // Current list of players
+  UserSettings _settings = UserSettings.defaults; // Current user settings
   late Widget _activeScreen; // Currently displayed screen
   bool _isLoading = true; // Loading state indicator
   int _idCounter = 0; // Counter for generating unique player IDs
@@ -31,12 +40,15 @@ class _PlayerAppManagerState extends State<PlayerAppManager> {
     _initialize(); // Load initial data
   }
 
-  // Initialize the app by loading saved players from database
+  // Initialize the app by loading saved players and settings from database
   Future<void> _initialize() async {
     await widget.repository.init();
+    await widget.settingsRepository.init();
     final loadedPlayers = await widget.repository.loadPlayers();
+    final loadedSettings = await widget.settingsRepository.loadSettings();
     setState(() {
       _players = loadedPlayers;
+      _settings = loadedSettings;
       _isLoading = false;
       _idCounter = _deriveCounter(loadedPlayers); // Set counter based on existing data
       _activeScreen = _buildListScreen();
@@ -88,6 +100,16 @@ class _PlayerAppManagerState extends State<PlayerAppManager> {
         player: player,
         onSubmit: (values) => _handleUpdatePlayer(player.id, values),
         onDelete: () => _handleDeletePlayer(player.id),
+        onCancel: _showListScreen,
+      );
+    });
+  }
+
+  void _showSettingsScreen() {
+    setState(() {
+      _activeScreen = UserSettingsScreen(
+        currentSettings: _settings,
+        onSave: _handleSaveSettings,
         onCancel: _showListScreen,
       );
     });
@@ -152,6 +174,16 @@ class _PlayerAppManagerState extends State<PlayerAppManager> {
     });
   }
 
+  // Save user settings to database
+  Future<void> _handleSaveSettings(UserSettings settings) async {
+    await widget.settingsRepository.saveSettings(settings);
+
+    setState(() {
+      _settings = settings;
+      _activeScreen = _buildListScreen();
+    });
+  }
+
   // Build the main player list screen
   Widget _buildListScreen() {
     return PlayerListScreen(
@@ -159,6 +191,7 @@ class _PlayerAppManagerState extends State<PlayerAppManager> {
       onAddPlayer: _showAddScreen,
       onEditPlayer: _showEditScreen,
       onDeletePlayer: _handleDeletePlayer,
+      onSettings: _showSettingsScreen,
       isLoading: _isLoading,
     );
   }
