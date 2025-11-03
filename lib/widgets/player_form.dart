@@ -4,12 +4,14 @@ import '../data/levels.dart';
 import '../models/player_form_values.dart';
 import '../models/player_level_range.dart';
 
+// Style for level scale labels (W, M, S)
 const TextStyle _scaleTopLabelStyle = TextStyle(
   color: Color(0xFF9AA5BD),
   fontSize: 10,
   fontWeight: FontWeight.w600,
 );
 
+// Reusable form widget for adding/editing player profiles with validation and skill level selection
 class PlayerForm extends StatefulWidget {
   const PlayerForm({
     super.key,
@@ -22,33 +24,35 @@ class PlayerForm extends StatefulWidget {
     this.onSecondaryPressed,
   });
 
-  final String title;
-  final String primaryButtonLabel;
-  final Future<void> Function(PlayerFormValues values) onSubmit;
-  final VoidCallback onCancel;
-  final PlayerFormValues? initialValues;
-  final String? secondaryButtonLabel;
-  final Future<void> Function()? onSecondaryPressed;
+  final String title; // Form title (e.g., "Add New Player")
+  final String primaryButtonLabel; // Primary button text (e.g., "Save Player")
+  final Future<void> Function(PlayerFormValues values) onSubmit; // Callback when form is submitted
+  final VoidCallback onCancel; // Callback when user cancels
+  final PlayerFormValues? initialValues; // Pre-fill form for editing
+  final String? secondaryButtonLabel; // Optional secondary button (e.g., "Delete Player")
+  final Future<void> Function()? onSecondaryPressed; // Secondary button callback
 
   @override
   State<PlayerForm> createState() => _PlayerFormState();
 }
 
 class _PlayerFormState extends State<PlayerForm> {
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>(); // Form validation key
 
+  // Text controllers for form fields
   late final TextEditingController _nicknameController;
   late final TextEditingController _fullNameController;
   late final TextEditingController _contactController;
   late final TextEditingController _emailController;
   late final TextEditingController _addressController;
   late final TextEditingController _remarksController;
-  late PlayerLevelRange _selectedRange;
-  bool _isSubmitting = false;
+  late PlayerLevelRange _selectedRange; // Currently selected skill level range
+  bool _isSubmitting = false; // Prevents multiple submissions
 
   @override
   void initState() {
     super.initState();
+    // Initialize form with provided values or defaults
     final defaults = widget.initialValues ??
         PlayerFormValues(
           nickname: '',
@@ -57,9 +61,10 @@ class _PlayerFormState extends State<PlayerForm> {
           email: '',
           address: '',
           remarks: '',
-          levelRange: const PlayerLevelRange(startIndex: 0, endIndex: 2),
+          levelRange: const PlayerLevelRange(startIndex: 0, endIndex: 2), // Default beginner range
         );
 
+    // Initialize text controllers with default/initial values
     _nicknameController = TextEditingController(text: defaults.nickname);
     _fullNameController = TextEditingController(text: defaults.fullName);
     _contactController = TextEditingController(text: defaults.contactNumber);
@@ -71,6 +76,7 @@ class _PlayerFormState extends State<PlayerForm> {
 
   @override
   void dispose() {
+    // Clean up text controllers to prevent memory leaks
     _nicknameController.dispose();
     _fullNameController.dispose();
     _contactController.dispose();
@@ -85,9 +91,10 @@ class _PlayerFormState extends State<PlayerForm> {
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
       child: Form(
-        key: _formKey,
+        key: _formKey, // Enables form validation
         child: Column(
           children: [
+            // Main form container with styling
             Container(
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -106,6 +113,7 @@ class _PlayerFormState extends State<PlayerForm> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    // Header with title and submit button
                     Row(
                       children: [
                         Expanded(
@@ -119,7 +127,7 @@ class _PlayerFormState extends State<PlayerForm> {
                           ),
                         ),
                         TextButton(
-                          onPressed: _isSubmitting ? null : _handleSubmit,
+                          onPressed: _isSubmitting ? null : _handleSubmit, // Disable during submission
                           child: Text(
                             widget.primaryButtonLabel,
                             style: const TextStyle(
@@ -132,6 +140,7 @@ class _PlayerFormState extends State<PlayerForm> {
                       ],
                     ),
                     const SizedBox(height: 24),
+                    // Required form fields with validation
                     _buildTextField(
                       controller: _nicknameController,
                       label: 'Nickname',
@@ -151,7 +160,7 @@ class _PlayerFormState extends State<PlayerForm> {
                       label: 'Mobile Number',
                       icon: Icons.phone_outlined,
                       keyboardType: TextInputType.phone,
-                      validator: _phoneValidator,
+                      validator: _phoneValidator, // Custom phone validation
                     ),
                     const SizedBox(height: 20),
                     _buildTextField(
@@ -159,7 +168,7 @@ class _PlayerFormState extends State<PlayerForm> {
                       label: 'Email Address',
                       icon: Icons.mail_outline,
                       keyboardType: TextInputType.emailAddress,
-                      validator: _emailValidator,
+                      validator: _emailValidator, // Custom email validation
                     ),
                     const SizedBox(height: 20),
                     _buildTextField(
@@ -167,7 +176,7 @@ class _PlayerFormState extends State<PlayerForm> {
                       label: 'Home Address',
                       icon: Icons.location_on_outlined,
                       validator: _nonEmptyValidator,
-                      minLines: 2,
+                      minLines: 2, // Multi-line address field
                       maxLines: 3,
                     ),
                     const SizedBox(height: 20),
@@ -175,23 +184,24 @@ class _PlayerFormState extends State<PlayerForm> {
                       controller: _remarksController,
                       label: 'Remarks',
                       icon: Icons.menu_book_outlined,
-                      minLines: 2,
+                      minLines: 2, // Multi-line remarks field (optional)
                       maxLines: 3,
                     ),
                     const SizedBox(height: 28),
-                    _buildLevelSelector(),
+                    _buildLevelSelector(), // Interactive skill level range selector
                   ],
                 ),
               ),
             ),
             const SizedBox(height: 24),
-            _buildFooterActions(),
+            _buildFooterActions(), // Cancel and optional secondary button
           ],
         ),
       ),
     );
   }
 
+  // Builds a styled text field with label, icon, and validation
   Widget _buildTextField({
     required TextEditingController controller,
     required String label,
@@ -204,6 +214,7 @@ class _PlayerFormState extends State<PlayerForm> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Field label in uppercase
         Text(
           label.toUpperCase(),
           style: const TextStyle(
@@ -214,28 +225,29 @@ class _PlayerFormState extends State<PlayerForm> {
           ),
         ),
         const SizedBox(height: 8),
+        // Text input field with styling and validation
         TextFormField(
           controller: controller,
           keyboardType: keyboardType,
-          validator: validator,
+          validator: validator, // Custom validation function
           minLines: minLines,
           maxLines: maxLines,
           style: const TextStyle(color: Color(0xFF1C2B5A)),
           decoration: InputDecoration(
             filled: true,
             fillColor: const Color(0xFFF8FAFF),
-            prefixIcon: Icon(icon, color: const Color(0xFF3D73FF)),
+            prefixIcon: Icon(icon, color: const Color(0xFF3D73FF)), // Blue icon
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
               borderSide: const BorderSide(color: Color(0xFFE1E8F5)),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(color: Color(0xFF3D73FF), width: 1.6),
+              borderSide: const BorderSide(color: Color(0xFF3D73FF), width: 1.6), // Blue focus border
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(color: Colors.redAccent),
+              borderSide: const BorderSide(color: Colors.redAccent), // Red error border
             ),
             focusedErrorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
@@ -247,6 +259,7 @@ class _PlayerFormState extends State<PlayerForm> {
     );
   }
 
+  // Builds the interactive skill level range selector with visual feedback
   Widget _buildLevelSelector() {
     final values = RangeValues(
       _selectedRange.startIndex.toDouble(),
@@ -276,6 +289,7 @@ class _PlayerFormState extends State<PlayerForm> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Display selected level range description
               Text(
                 describeLevelRange(_selectedRange),
                 style: const TextStyle(
@@ -284,18 +298,19 @@ class _PlayerFormState extends State<PlayerForm> {
                 ),
               ),
               const SizedBox(height: 12),
+              // Range slider for selecting skill level range
               SliderTheme(
                 data: SliderTheme.of(context).copyWith(
                   thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 10),
-                  activeTrackColor: const Color(0xFF3D73FF),
-                  inactiveTrackColor: const Color(0xFFD7E2F7),
+                  activeTrackColor: const Color(0xFF3D73FF), // Blue active track
+                  inactiveTrackColor: const Color(0xFFD7E2F7), // Light blue inactive track
                   trackHeight: 4,
                 ),
                 child: RangeSlider(
                   min: 0,
                   max: (levelSteps.length - 1).toDouble(),
                   values: values,
-                  divisions: levelSteps.length - 1,
+                  divisions: levelSteps.length - 1, // Discrete level steps
                   labels: RangeLabels(
                     getLevelStep(_selectedRange.startIndex).displayLabel,
                     getLevelStep(_selectedRange.endIndex).displayLabel,
@@ -311,7 +326,7 @@ class _PlayerFormState extends State<PlayerForm> {
                 ),
               ),
               const SizedBox(height: 12),
-              _buildLevelScale(),
+              _buildLevelScale(), // Visual scale showing all available levels
             ],
           ),
         ),
@@ -319,24 +334,27 @@ class _PlayerFormState extends State<PlayerForm> {
     );
   }
 
+  // Builds visual scale showing all skill levels (Weak/Medium/Strong for each level)
   Widget _buildLevelScale() {
     return Column(
       children: [
+        // Top row showing W, M, S indicators for each level
         Row(
           children: levelNames.map((_) {
             return Expanded(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: const [
-                  Text('W', style: _scaleTopLabelStyle),
-                  Text('M', style: _scaleTopLabelStyle),
-                  Text('S', style: _scaleTopLabelStyle),
+                  Text('W', style: _scaleTopLabelStyle), // Weak
+                  Text('M', style: _scaleTopLabelStyle), // Medium
+                  Text('S', style: _scaleTopLabelStyle), // Strong
                 ],
               ),
             );
           }).toList(),
         ),
         const SizedBox(height: 6),
+        // Bottom row showing level names (Beginner, Intermediate, etc.)
         Row(
           children: levelNames.map((level) {
             return Expanded(
@@ -357,10 +375,11 @@ class _PlayerFormState extends State<PlayerForm> {
     );
   }
 
+  // Builds footer action buttons (Cancel and optional secondary button)
   Widget _buildFooterActions() {
     final actions = <Widget>[
       TextButton(
-        onPressed: _isSubmitting ? null : widget.onCancel,
+        onPressed: _isSubmitting ? null : widget.onCancel, // Disable during submission
         style: TextButton.styleFrom(
           foregroundColor: const Color(0xFF6C7A92),
           textStyle: const TextStyle(fontWeight: FontWeight.w600),
@@ -369,12 +388,13 @@ class _PlayerFormState extends State<PlayerForm> {
       ),
     ];
 
+    // Add secondary button if provided (e.g., Delete button)
     if (widget.secondaryButtonLabel != null && widget.onSecondaryPressed != null) {
       actions.add(
         TextButton(
           onPressed: _isSubmitting ? null : () => _handleSecondaryAction(widget.onSecondaryPressed!),
           style: TextButton.styleFrom(
-            foregroundColor: const Color(0xFFFF6B6B),
+            foregroundColor: const Color(0xFFFF6B6B), // Red color for destructive actions
             textStyle: const TextStyle(fontWeight: FontWeight.w600),
           ),
           child: Text(widget.secondaryButtonLabel!),
@@ -393,24 +413,28 @@ class _PlayerFormState extends State<PlayerForm> {
     );
   }
 
+  // Handles secondary button action (e.g., delete) with loading state management
   Future<void> _handleSecondaryAction(Future<void> Function() action) async {
     if (_isSubmitting) {
-      return;
+      return; // Prevent multiple simultaneous actions
     }
     setState(() {
-      _isSubmitting = true;
+      _isSubmitting = true; // Show loading state
     });
     try {
       await action();
     } finally {
       if (mounted) {
         setState(() {
-          _isSubmitting = false;
+          _isSubmitting = false; // Reset loading state
         });
       }
     }
   }
 
+  // Validation functions for form fields
+  
+  // Validates that field is not empty
   String? _nonEmptyValidator(String? value) {
     if (value == null || value.trim().isEmpty) {
       return 'This field cannot be empty';
@@ -418,6 +442,7 @@ class _PlayerFormState extends State<PlayerForm> {
     return null;
   }
 
+  // Validates phone number format (digits only)
   String? _phoneValidator(String? value) {
     if (value == null || value.trim().isEmpty) {
       return 'Contact number is required';
@@ -429,6 +454,7 @@ class _PlayerFormState extends State<PlayerForm> {
     return null;
   }
 
+  // Validates email format using regex
   String? _emailValidator(String? value) {
     if (value == null || value.trim().isEmpty) {
       return 'Email is required';
@@ -440,11 +466,13 @@ class _PlayerFormState extends State<PlayerForm> {
     return null;
   }
 
+  // Handles form submission with validation
   void _handleSubmit() {
     if (!(_formKey.currentState?.validate() ?? false)) {
-      return;
+      return; // Stop if validation fails
     }
 
+    // Create form values from current input
     final values = PlayerFormValues(
       nickname: _nicknameController.text.trim(),
       fullName: _fullNameController.text.trim(),
@@ -455,7 +483,7 @@ class _PlayerFormState extends State<PlayerForm> {
       levelRange: _selectedRange,
     );
 
-    widget.onSubmit(values);
+    widget.onSubmit(values); // Call parent callback with validated data
   }
 }
 
