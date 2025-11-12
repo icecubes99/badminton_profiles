@@ -9,12 +9,12 @@ class UserSettingsScreen extends StatefulWidget {
     super.key,
     required this.currentSettings,
     required this.onSave,
-    required this.onCancel,
+    this.onCancel,
   });
 
   final UserSettings currentSettings; // Current saved settings
   final Future<void> Function(UserSettings settings) onSave; // Callback when settings are saved
-  final VoidCallback onCancel; // Callback when user cancels
+  final VoidCallback? onCancel; // Optional callback when user cancels (for backward compatibility)
 
   @override
   State<UserSettingsScreen> createState() => _UserSettingsScreenState();
@@ -152,15 +152,16 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
                   ),
                 ),
                 const SizedBox(height: 24),
-                // Cancel button
-                TextButton(
-                  onPressed: _isSaving ? null : widget.onCancel,
-                  style: TextButton.styleFrom(
-                    foregroundColor: const Color(0xFF6C7A92),
-                    textStyle: const TextStyle(fontWeight: FontWeight.w600),
+                // Optional cancel button (for backward compatibility with non-nav bar usage)
+                if (widget.onCancel != null)
+                  TextButton(
+                    onPressed: _isSaving ? null : widget.onCancel,
+                    style: TextButton.styleFrom(
+                      foregroundColor: const Color(0xFF6C7A92),
+                      textStyle: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    child: const Text('Cancel'),
                   ),
-                  child: const Text('Cancel'),
-                ),
               ],
             ),
           ),

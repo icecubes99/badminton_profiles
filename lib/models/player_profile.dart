@@ -25,7 +25,7 @@ class PlayerProfile {
   @HiveField(5)
   final String address; // Physical address
 
-  @HiveField(6)
+  @HiveField(6)   
   final String remarks; // Additional notes about the player
 
   @HiveField(7)

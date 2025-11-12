@@ -11,7 +11,6 @@ class PlayerListScreen extends StatefulWidget {
     required this.onAddPlayer,
     required this.onEditPlayer,
     required this.onDeletePlayer,
-    required this.onSettings,
     this.isLoading = false,
   });
 
@@ -19,7 +18,6 @@ class PlayerListScreen extends StatefulWidget {
   final VoidCallback onAddPlayer; // Callback to add new player
   final void Function(PlayerProfile player) onEditPlayer; // Callback to edit existing player
   final Future<void> Function(String playerId) onDeletePlayer; // Callback to delete player
-  final VoidCallback onSettings; // Callback to open settings
   final bool isLoading; // Loading state indicator
 
   @override
@@ -48,7 +46,7 @@ class _PlayerListScreenState extends State<PlayerListScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Header with title, settings button, and add button
+              // Header with title and add button
               Row(
                 children: [
                   const Text(
@@ -60,8 +58,6 @@ class _PlayerListScreenState extends State<PlayerListScreen> {
                     ),
                   ),
                   const Spacer(),
-                  _buildSettingsButton(), // Settings button
-                  const SizedBox(width: 12),
                   _buildAddButton(), // Floating action button for adding players
                 ],
               ),
@@ -139,22 +135,6 @@ class _PlayerListScreenState extends State<PlayerListScreen> {
               ),
             );
           },
-        ),
-      ),
-    );
-  }
-
-  // Builds the settings button with light blue background
-  Widget _buildSettingsButton() {
-    return Material(
-      color: const Color(0xFFE1E8F5), // Light blue background
-      shape: const CircleBorder(),
-      child: InkWell(
-        customBorder: const CircleBorder(),
-        onTap: widget.onSettings, // Trigger settings callback
-        child: const Padding(
-          padding: EdgeInsets.all(12),
-          child: Icon(Icons.settings, color: Color(0xFF1C2B5A), size: 24), // Dark blue settings icon
         ),
       ),
     );
