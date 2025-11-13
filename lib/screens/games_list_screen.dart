@@ -190,7 +190,7 @@ class _GamesListScreenState extends State<GamesListScreen> {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        '0 players', // TODO: Update when players are assigned
+                        '${game.playerIds.length} ${game.playerIds.length == 1 ? 'player' : 'players'}',
                         style: const TextStyle(
                           color: Color(0xFF9AA5BD),
                           fontSize: 12,
